@@ -1,7 +1,8 @@
 import React, { useState } from 'react' 
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { assets } from '../assets/assets'
-import { MenuIcon, SearchIcon, XIcon } from 'lucide-react'
+import { MenuIcon, SearchIcon, TicketIcon, TicketPlus, XIcon } from 'lucide-react'
+import { useClerk, UserButton, useUser } from '@clerk/clerk-react'
 
 
 const Navbar = () => {
@@ -9,6 +10,9 @@ const Navbar = () => {
   // adding a functionality which will show will hide navbar as header in case of mobile screen
 
   const [isOpen, SetIsOpen] = useState(false);
+  const {user} =  useUser()
+  const {openSignIn} = useClerk()
+  const navigate = useNavigate()
 
   return (
       // py = vertical padding , px = horizontal padding 
@@ -29,7 +33,20 @@ const Navbar = () => {
 
       <div className='flex items-center gap-8'>
         <SearchIcon className='max-md:hidden w-6 h-6 cursor-pointer' />
-        <button className='px-4 py-1 sm:px-7 sm:py-2 bg-primary hover:bg-primary-dull   transition rounded-full font-medium cursor-pointer'>Login</button>
+
+        {
+          !user ? (
+            <button onClick={openSignIn} className='px-4 py-1   sm:px-7 sm:py-2 bg-primary hover:bg-primary-dull   transition rounded-full font-medium cursor-pointer'>Login</button>
+          ) : (
+            <UserButton>
+              <UserButton.MenuItems>
+                <UserButton.Action label='My Bookings' labelIcon={<TicketPlus width={15}/>} onClick={()=>{
+                  navigate('/my-bookings')
+                }} />
+              </UserButton.MenuItems>
+            </UserButton>
+          )
+        }
       </div>
 
       <MenuIcon className='max-md:ml-4 md:hidden w-8 h-8 cursor-pointer' onClick={() => { SetIsOpen(!isOpen) }} />
