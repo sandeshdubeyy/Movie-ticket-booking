@@ -1,5 +1,5 @@
 import React from 'react'
-import Navbar from './components/Navbar.components'
+import Navbar from './components/Navbar.jsx'
 import { Route ,Routes, useLocation } from 'react-router-dom'
 import Home from './pages/Home.pages'
 import Movies from './pages/Movies.pages'
@@ -7,7 +7,8 @@ import MovieDetails from './pages/MovieDetails.pages'
 import SeatLayout from './pages/SeatLayout.pages'
 import MyBookings from './pages/MyBookings.pages'
 import Favourties from './pages/Favourites.home'
-import Footer from './components/Footer.components'
+import Footer from './components/Footer.jsx'
+import { Toaster } from 'react-hot-toast'
 
 const App = () => {
 
@@ -15,7 +16,7 @@ const App = () => {
   return (
     <>
       {!isAdminRoute && <Navbar/>}
-
+      <Toaster position='top-center' />
       <Routes> 
         <Route path='/' element={ <Home/> }/>
         <Route path='/movies' element={ <Movies/> }/>
