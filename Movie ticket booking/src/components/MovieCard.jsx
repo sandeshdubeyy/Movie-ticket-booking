@@ -25,7 +25,6 @@ const MovieCard = ({movie}) => {
                 {movie.vote_average.toFixed(1)}
             </p>
         </div>
-
     </div>
   )
 }

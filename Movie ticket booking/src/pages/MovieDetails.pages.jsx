@@ -20,8 +20,7 @@ const MovieDetails = () => {
       setShow({
       movie:show,
       dateTime:dummyDateTimeData
-    })
-    }
+    })}
   }
 
   useEffect(()=>{
@@ -32,7 +31,6 @@ const MovieDetails = () => {
     <div className='px-6 md:px-16 lg:px-40 pt-30 md:pt-50'>
       <div className='flex flex-row m:flex-row gap-8 max-w-6xl mx-auto'>
         <img src={show.movie.poster_path} alt="" className='max-md:mx-auto rounded-xl h-104 max-w-70 object-cover' />
-
         <div className='relative flex flex-col gap-3'>
           <BlurCircle top='-100px' left='-100px'/>
           <p className='text-primary'>ENGLISH</p>
@@ -87,7 +85,6 @@ const MovieDetails = () => {
       <div className='flex justify-center mt-20'>
           <button onClick={()=>{navigate('/movies'); scrollTo(0,0)}} className='px-10 py-3 text-sm bg-primary hover:bg-primary-dull transition-shadow rounded-md font font-medium cursor-pointer'>Show more</button>
       </div>
-
     </div> ) : 
     <Loading /> 
   )
