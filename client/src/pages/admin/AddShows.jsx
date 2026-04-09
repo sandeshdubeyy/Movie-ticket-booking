@@ -38,6 +38,14 @@ const AddShows = () => {
     });
   };
 
+  //Find the times for a date
+
+  //Remove the selected time
+
+  //If no times remain → remove the date
+
+  //Otherwise → update the date with remaining times
+
   const handleRemoveTime = (date, time) => {
     setDateTimeSelection((prev) => {
       const filteredTimes = prev[date].filter((t) => t !== time);
@@ -52,6 +60,7 @@ const AddShows = () => {
     });
   };
 
+  
   useEffect(() => {
     fetchNowPlayingMovies();
   }, []);
