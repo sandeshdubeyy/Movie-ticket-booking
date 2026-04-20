@@ -1,5 +1,5 @@
 import Booking from "../models/Booking.models.js"
-import Show from "../models/Show.models"
+import Show from "../models/Show.models.js"
 import User from "../models/User.models.js"
 
 // api to check if user is admin
@@ -15,8 +15,8 @@ export const getDashboardData = async (req,res) => {
         const totalUser = await User.countDocuments()
 
         const DashboardData = {
-            totalBookings = bookings.length,
-            totalRevenue = bookings.reduce((acc,booking)=> acc + booking.amount, 0),
+            totalBookings : bookings.length,
+            totalRevenue : bookings.reduce((acc,booking)=> acc + booking.amount, 0),
             activeShows,
             totalUser
         }
