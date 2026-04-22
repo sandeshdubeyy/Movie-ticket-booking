@@ -14,10 +14,15 @@ import Dashboard from './pages/admin/Dashboard.jsx'
 import AddShows from './pages/admin/AddShows.jsx'
 import ListShows from './pages/admin/ListShows.jsx'
 import ListBookings from './pages/admin/ListBookings.jsx'
+import { useAppContext } from './context/AppContext.jsx'
+import { SignIn } from '@clerk/clerk-react'
 
 const App = () => {
 
   const isAdminRoute = useLocation().pathname.startsWith('/admin')  // this gives a boolean if we are on /admin page or not
+  
+  const {user} = useAppContext()
+  
   return (
     <>
       {!isAdminRoute && <Navbar/>}
@@ -31,7 +36,11 @@ const App = () => {
         <Route path='/favourites' element={ <Favourties/> }/>
 
         {/* admin routes */}
-        <Route path='/admin/*' element={<Layout/>}>
+        <Route path='/admin/*' element={user ? <Layout/> : (
+          <div className='min-h-screen flex justify-center items-center'>
+            <SignIn fallbackRedirectUrl={'/admin'}/>
+          </div>
+        )}>
           <Route index element={<Dashboard/>}/>
           <Route path='add-shows' element={<AddShows/>}/>
           <Route path='list-shows' element={<ListShows/>}/>
