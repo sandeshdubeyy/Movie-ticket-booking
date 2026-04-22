@@ -87,3 +87,32 @@ export const getOccupuedSeats = async (req,res) => {
         })
     }
 }
+
+export const mockPayBooking = async (req, res) => {
+    try {
+        const { bookingId } = req.params
+        const { userId } = req.auth()
+
+        if (!userId) {
+            return res.json({ success: false, message: 'Please login to proceed' })
+        }
+
+        const booking = await Booking.findOne({ _id: bookingId, user: userId })
+        if (!booking) {
+            return res.json({ success: false, message: 'Booking not found' })
+        }
+
+        if (booking.isPaid) {
+            return res.json({ success: true, message: 'Booking already paid' })
+        }
+
+        booking.isPaid = true
+        booking.paymentLink = `mock_payment_${Date.now()}`
+        await booking.save()
+
+        return res.json({ success: true, message: 'Payment successful' })
+    } catch (error) {
+        console.log(error.message);
+        return res.json({ success: false, message: error.message })
+    }
+}

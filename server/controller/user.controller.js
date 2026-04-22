@@ -18,7 +18,7 @@ export const getUserBookings = async (req,res) => {
         res.json({success:true,bookings})
     } catch (error) {
         console.log(error.message);
-        res.json({sucess:false,message: error.message})
+        res.json({success:false,message: error.message})
     }
 }
 
@@ -34,10 +34,10 @@ export const updateFavorite = async (req,res) => {
             user.privateMetadata.favorites=[]
         }
 
-        if(!user.privateMetadata.includes(movieId)){
+        if(!user.privateMetadata.favorites.includes(movieId)){
             user.privateMetadata.favorites.push(movieId)
         }else{
-            user.privateMetadata.favorites = user.privateMetadata.favorites.filer(item => item!=movie)
+            user.privateMetadata.favorites = user.privateMetadata.favorites.filter(item => item!=movieId)
         }
 
         await clerkClient.users.updateUserMetadata(userId,{privateMetadata:user.privateMetadata})
@@ -45,7 +45,7 @@ export const updateFavorite = async (req,res) => {
         res.json({success:true, message:'favorite movies updated'})
     } catch (error) {
         console.log(error.message);
-        res.json({sucess:false,message: error.message})
+        res.json({success:false,message: error.message})
     }
 }
 
@@ -62,6 +62,6 @@ export const getFavorites= async (req,res) => {
         res.json({success:true, movies})
     } catch (error) {
         console.log(error.message);
-        res.json({sucess:false,message: error.message})
+        res.json({success:false,message: error.message})
     }
 }
