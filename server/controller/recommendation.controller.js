@@ -124,16 +124,21 @@ Format:
       });
     }
 
-    const allowedMovieIds = new Set(moviesFromDB.map((movie) => String(movie._id)));
-    const allowedMovieTitles = new Set(moviesFromDB.map((movie) => movie.title));
+    const movieById = new Map(moviesFromDB.map((movie) => [String(movie._id), movie]));
+    const movieByTitle = new Map(moviesFromDB.map((movie) => [movie.title, movie]));
 
     const normalized = parsed
       .filter((item) => item && typeof item === "object")
-      .filter((item) => {
+      .map((item) => {
         const possibleId = item._id ? String(item._id) : "";
         const possibleTitle = item.title ? String(item.title) : "";
-        return allowedMovieIds.has(possibleId) || allowedMovieTitles.has(possibleTitle);
+        return movieById.get(possibleId) || movieByTitle.get(possibleTitle) || null;
       })
+      .filter(Boolean)
+      .filter(
+        (movie, index, arr) =>
+          arr.findIndex((candidate) => String(candidate._id) === String(movie._id)) === index
+      )
       .slice(0, RECOMMENDATION_LIMIT);
 
     return res.json({ success: true, recommendations: normalized });

@@ -16,10 +16,13 @@ import ListShows from './pages/admin/ListShows.jsx'
 import ListBookings from './pages/admin/ListBookings.jsx'
 import { useAppContext } from './context/AppContext.jsx'
 import { SignIn } from '@clerk/clerk-react'
+import RecommendationWidget from './components/RecommendationWidget.jsx'
 
 const App = () => {
 
-  const isAdminRoute = useLocation().pathname.startsWith('/admin')  // this gives a boolean if we are on /admin page or not
+  const location = useLocation()
+  const isAdminRoute = location.pathname.startsWith('/admin')  // this gives a boolean if we are on /admin page or not
+  const showRecommendationWidget = ['/', '/movies', '/favourites'].includes(location.pathname)
   
   const {user} = useAppContext()
   
@@ -49,6 +52,7 @@ const App = () => {
 
       </Routes>
 
+      {!isAdminRoute && showRecommendationWidget && <RecommendationWidget/>}
       {!isAdminRoute && <Footer/>}
     </>
   )
