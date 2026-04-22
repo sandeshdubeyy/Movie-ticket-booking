@@ -4,7 +4,7 @@ import User from "../models/User.models.js"
 
 // api to check if user is admin
 export const isAdmin = async (req,res) => {
-    res.json({sucess:true, isAdmin: true})
+    res.json({success:true, isAdmin: true})
 }
 
 // getting the dashboard data
@@ -14,18 +14,18 @@ export const getDashboardData = async (req,res) => {
         const activeShows = await Show.find({showDateTime:{$gte: new Date()}}).populate('movie')
         const totalUser = await User.countDocuments()
 
-        const DashboardData = {
+        const dashboardData = {
             totalBookings : bookings.length,
             totalRevenue : bookings.reduce((acc,booking)=> acc + booking.amount, 0),
             activeShows,
             totalUser
         }
 
-        res.json({sucess:true, DashboardData})
+        res.json({success:true, dashboardData})
 
     } catch (error) {
         console.log(error);
-        res.json({sucess:false, message: error.message})
+        res.json({success:false, message: error.message})
     }
 }
 
@@ -33,13 +33,13 @@ export const getDashboardData = async (req,res) => {
 
 export const getAllShows = async (req,res) => {
     try {
-        const shows = await (await Show.find({showDateTime:  {$gte: new Date}}).populate('movie')).sort({showDateTime:1})
+        const shows = await Show.find({showDateTime: {$gte: new Date()}}).populate('movie').sort({showDateTime:1})
 
-        res.json({sucess:true, shows})
+        res.json({success:true, shows})
 
     } catch (error) {
         console.log(error);
-        res.json({sucess:false, message: error.message})
+        res.json({success:false, message: error.message})
     }
 }
 
@@ -51,10 +51,10 @@ export const getAllBookings = async (req,res) => {
             populate:{path:'movie'}
         }).sort({createdAt: -1})
 
-        res.json({sucess:true, bookings})
+        res.json({success:true, bookings})
 
     } catch (error) {
         console.log(error.message);
-        res.json({sucess:false, message: error.message})
+        res.json({success:false, message: error.message})
     }
 }
