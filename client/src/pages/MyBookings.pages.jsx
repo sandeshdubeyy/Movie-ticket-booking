@@ -1,12 +1,10 @@
-import React, { useEffect, useState } from 'react'
-import { dummyBookingData } from '../assets/assets'
+import React, { useEffect, useMemo, useState } from 'react'
 import Loading from '../components/Loading'
 import BlurCircle from '../components/BlurCircle'
 import timeFormat from '../lib/timeFormat'
 import dateFormat from '../lib/dateFormat.js'
 import { useAppContext } from '../context/AppContext.jsx'
-import { SquareDashedBottomCodeIcon } from 'lucide-react'
-import toast from 'react-hot-toast'
+import QRCode from 'qrcode'
 
 const MyBookings = () => {
   const {axios, getToken, user, image_base_url}= useAppContext()
@@ -16,7 +14,7 @@ const MyBookings = () => {
 
   const [bookings, setBookings] = useState([])
   const [isLoading, setIsLoading] = useState(true)
-  const [payingBookingId, setPayingBookingId] = useState(null)
+  const [mockPayQrUrl, setMockPayQrUrl] = useState('')
 
   const getMyBookings = async () => {
     try {
@@ -38,26 +36,22 @@ const MyBookings = () => {
     }
   },[user])
 
-  const handlePayNow = async (bookingId) => {
-    try {
-      setPayingBookingId(bookingId)
-      const { data } = await axios.post(`/api/booking/pay/${bookingId}`, {}, { headers: {
-        Authorization: `Bearer ${await getToken()}`
-      }})
+  const mockPayUrl = useMemo(() => {
+    if (typeof window === 'undefined') return '/mock-pay'
+    return `${window.location.origin}/mock-pay`
+  }, [])
 
-      if (data.success) {
-        toast.success(data.message)
-        await getMyBookings()
-      } else {
-        toast.error(data.message)
+  useEffect(() => {
+    const run = async () => {
+      try {
+        const dataUrl = await QRCode.toDataURL(mockPayUrl, { width: 180, margin: 1 })
+        setMockPayQrUrl(dataUrl)
+      } catch (error) {
+        console.log(error)
       }
-    } catch (error) {
-      console.log(error);
-      toast.error('Payment failed')
-    } finally {
-      setPayingBookingId(null)
     }
-  }
+    run()
+  }, [mockPayUrl])
 
   return !isLoading ? (
     
@@ -83,13 +77,38 @@ const MyBookings = () => {
           <div className='flex flex-col md:items-end md:text-right justify-between p-4'>
             <div className='flex items0-center gap-4'>
               <p className='text-2xl font-semibold mb-3'>{currency}{item.amount}</p>
-              {!item.isPaid && <button onClick={() => handlePayNow(item._id)} disabled={payingBookingId === item._id} className='bg-primary px-4 py-1.5 mb-3 text-sm rounded-full font-medium cursor-pointer disabled:opacity-60'>
-              Pay Now</button>}
             </div>
             <div className='text-sm'>
                 <p><span className='text-gray-400'>Total tickets:</span>{item.bookedSeats.length}</p>
                 <p><span className='text-gray-400'>Seat number::</span>{item.bookedSeats.join(", ")}</p>
             </div>
+
+            {!item.isPaid && (
+              <div className='mt-4 flex flex-col md:items-end gap-2'>
+                {mockPayQrUrl ? (
+                  <img
+                    src={mockPayQrUrl}
+                    alt="Mock payment QR"
+                    className='w-[150px] h-[150px] rounded bg-white p-2'
+                  />
+                ) : (
+                  <div className='w-[150px] h-[150px] rounded bg-white/10 flex items-center justify-center text-xs text-gray-300'>
+                    Loading QR…
+                  </div>
+                )}
+
+                <a
+                  href={`/mock-pay?bookingId=${item._id}`}
+                  className='bg-primary px-4 py-1.5 text-sm rounded-full font-medium cursor-pointer inline-block'
+                >
+                  Open payment page
+                </a>
+
+                <p className='text-xs text-gray-400 max-w-[240px] md:text-right'>
+                  Scan the QR to open the mock payment page, then select this booking and submit.
+                </p>
+              </div>
+            )}
           </div>
         </div>
 

@@ -39,17 +39,17 @@ const RecommendationWidget = () => {
       setError("");
 
       const token = await getToken();
+
       const { data } = await axios.get("/api/user/recommendations", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       if (data?.success) {
         setRecommendations(data.recommendations || []);
-        setHasFetched(true);
       } else {
         setError(data?.message || "Unable to get recommendations");
-        setHasFetched(false);
       }
+
     } catch (fetchError) {
       setError(fetchError?.response?.data?.message || "Something went wrong");
       setHasFetched(false);

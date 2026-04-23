@@ -7,6 +7,7 @@ import MovieDetails from './pages/MovieDetails.pages'
 import SeatLayout from './pages/SeatLayout.pages'
 import MyBookings from './pages/MyBookings.pages'
 import Favourties from './pages/Favourites.pages.jsx'
+import MockPayment from './pages/MockPayment.pages.jsx'
 import Footer from './components/Footer.jsx'
 import { Toaster } from 'react-hot-toast'
 import Layout from './pages/admin/Layout.jsx'
@@ -36,6 +37,7 @@ const App = () => {
         <Route path='/movies/:id' element={ <MovieDetails/> }/>
         <Route path='/movies/:id/:date' element={ <SeatLayout/> }/>
         <Route path='/my-bookings' element={ <MyBookings/> }/>
+        <Route path='/mock-pay' element={ <MockPayment/> }/>
         <Route path='/favourites' element={ <Favourties/> }/>
 
         {/* admin routes */}

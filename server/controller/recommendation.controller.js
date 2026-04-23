@@ -93,6 +93,8 @@ Format:
       OPENROUTER_URL,
       {
         model: "anthropic/claude-sonnet-4-6",
+        max_tokens: 600,
+        temperature: 0.3,
         messages: [
           {
             role: "system",
