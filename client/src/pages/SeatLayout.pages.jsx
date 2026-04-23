@@ -62,7 +62,7 @@ const SeatLayout = () => {
 
             if(data.success){
               toast.success(data.message)
-              navigate('/my-booking')
+              navigate('/my-bookings')
             }
             else{
               toast.error(data.message)
