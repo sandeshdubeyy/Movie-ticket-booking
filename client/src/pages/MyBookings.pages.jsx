@@ -4,7 +4,6 @@ import BlurCircle from '../components/BlurCircle'
 import timeFormat from '../lib/timeFormat'
 import dateFormat from '../lib/dateFormat.js'
 import { useAppContext } from '../context/AppContext.jsx'
-import QRCode from 'qrcode'
 
 const MyBookings = () => {
   const {axios, getToken, user, image_base_url}= useAppContext()
@@ -14,7 +13,6 @@ const MyBookings = () => {
 
   const [bookings, setBookings] = useState([])
   const [isLoading, setIsLoading] = useState(true)
-  const [mockPayQrUrl, setMockPayQrUrl] = useState('')
 
   const getMyBookings = async () => {
     try {
@@ -35,23 +33,6 @@ const MyBookings = () => {
       getMyBookings()
     }
   },[user])
-
-  const mockPayUrl = useMemo(() => {
-    if (typeof window === 'undefined') return '/mock-pay'
-    return `${window.location.origin}/mock-pay`
-  }, [])
-
-  useEffect(() => {
-    const run = async () => {
-      try {
-        const dataUrl = await QRCode.toDataURL(mockPayUrl, { width: 180, margin: 1 })
-        setMockPayQrUrl(dataUrl)
-      } catch (error) {
-        console.log(error)
-      }
-    }
-    run()
-  }, [mockPayUrl])
 
   return !isLoading ? (
     
@@ -85,28 +66,12 @@ const MyBookings = () => {
 
             {!item.isPaid && (
               <div className='mt-4 flex flex-col md:items-end gap-2'>
-                {mockPayQrUrl ? (
-                  <img
-                    src={mockPayQrUrl}
-                    alt="Mock payment QR"
-                    className='w-[150px] h-[150px] rounded bg-white p-2'
-                  />
-                ) : (
-                  <div className='w-[150px] h-[150px] rounded bg-white/10 flex items-center justify-center text-xs text-gray-300'>
-                    Loading QR…
-                  </div>
-                )}
-
-                <a
-                  href={`/mock-pay?bookingId=${item._id}`}
-                  className='bg-primary px-4 py-1.5 text-sm rounded-full font-medium cursor-pointer inline-block'
+                <button
+                  type="button"
+                  className='bg-primary px-4 py-1.5 text-sm rounded-full font-medium'
                 >
-                  Open payment page
-                </a>
-
-                <p className='text-xs text-gray-400 max-w-[240px] md:text-right'>
-                  Scan the QR to open the mock payment page, then select this booking and submit.
-                </p>
+                  Pay Now
+                </button>
               </div>
             )}
           </div>
