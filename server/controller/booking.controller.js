@@ -1,5 +1,8 @@
+import User from "../models/User.models.js";
 import Booking from "../models/Booking.models.js";
 import Show from "../models/Show.models.js"
+import razorpayInstance from "../configs/razorpay.configs.js";
+import crypto from 'crypto'
 
 // check if theres any seat available or not
 export const checkSeatsAvailability = async (showId, selectedSeats) => {
@@ -79,6 +82,94 @@ export const getOccupuedSeats = async (req,res) => {
                 occupiedSeats
             })
 
+    } catch (error) {
+        console.log(error.message);
+        res.json({
+            success:false,
+            message:error.message
+        })
+    }
+}
+
+export const createOrder = async (req,res) => {
+    try {
+        
+        const {userId} = req.auth()
+        const {bookingId} = req.params
+
+        if(!userId){
+            return res.json({success:false, message: "Login to proceed"})
+        }
+
+        const booking = await Booking.findOne({
+            _id:bookingId,
+            user:userId
+        })
+
+        if(!booking){
+            return res.json({success:false, message: "Booking not found"})
+        }
+
+        if(booking.isPaid){
+            return res.json({success:false, message: "Payment is already done"})
+        }
+
+        const order = await razorpayInstance.orders.create({
+            amount: booking.amount*100,
+            currency:'INR',
+            receipt:`booking_${booking._id}`
+        })
+
+        res.json({
+            success:true,
+            orderId: order.id,
+            amount: order.amount,
+            currency: order.currency
+        })
+
+    } catch (error) {
+        console.log(error.message);
+        res.json({
+            success:false,
+            message:error.message
+        })
+    }
+}
+
+export const verifyPayment = async (req,res) => {
+    try {
+        const {userId} = req.auth()
+        const {bookingId, razorpay_order_id, razorpay_payment_id, razorpay_signature} = req.body
+
+        if(!userId){
+            return res.json({success:false, message: "Login to proceed"})
+        }
+
+        const body = razorpay_order_id + '|' + razorpay_payment_id
+        const expectedSignature = crypto
+        .createHmac('sha256',process.env.RAZORPAY_TEST_SECRET_KEY)
+        .update(body)
+        .digest('hex')
+
+        if(expectedSignature != razorpay_signature){
+            return res.json({ success: false, message: 'Invalid payment signature' })
+        }
+
+        const booking = await Booking.findOne({ _id: bookingId, user: userId })
+
+        if (!booking) {
+            return res.json({ success: false, message: 'Booking not found' })
+        }
+        if (booking.isPaid) {
+            return res.json({ success: true, message: 'Already paid' })
+        }
+        
+        booking.isPaid = true
+        booking.paymentLink = razorpay_payment_id
+        
+        await booking.save()
+        
+        res.json({ success: true, message: 'Payment verified' })
     } catch (error) {
         console.log(error.message);
         res.json({
