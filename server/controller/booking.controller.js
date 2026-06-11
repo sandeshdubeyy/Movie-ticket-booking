@@ -169,31 +169,30 @@ export const verifyPayment = async (req,res) => {
         }
 
         console.log('verifyPayment: sending inngest event for booking', bookingId)
-        await inngest.send({
-            name: "app/show.booked",
-            data: { bookingId }
-        })
-        console.log('verifyPayment: inngest send completed for booking', bookingId)
 
         booking.isPaid = true
         booking.paymentLink = razorpay_payment_id
 
         await booking.save()
-
-        try {
-            const emailResp = await sendEmail({
-                to: booking.user.email,
-                subject: `Payment confirmation: booking ${bookingId}`,
-                body: `<p>Your payment was confirmed. Booking ID: ${bookingId}</p>`
-            })
-            console.log('verifyPayment: direct email sent for booking', bookingId, {
-                messageId: emailResp?.messageId,
-                accepted: emailResp?.accepted,
-                rejected: emailResp?.rejected
-            })
-        } catch (emailError) {
-            console.log('verifyPayment: direct email failed:', emailError && emailError.message)
-        }
+        await inngest.send({
+            name: "app/show.booked",
+            data: { bookingId }
+        })
+        console.log('verifyPayment: inngest send completed for booking', bookingId)
+        // try {
+        //     const emailResp = await sendEmail({
+        //         to: booking.user.email,
+        //         subject: `Payment confirmation: booking ${bookingId}`,
+        //         body: `<p>Your payment was confirmed. Booking ID: ${bookingId}</p>`
+        //     })
+        //     console.log('verifyPayment: direct email sent for booking', bookingId, {
+        //         messageId: emailResp?.messageId,
+        //         accepted: emailResp?.accepted,
+        //         rejected: emailResp?.rejected
+        //     })
+        // } catch (emailError) {
+        //     console.log('verifyPayment: direct email failed:', emailError && emailError.message)
+        // }
 
         res.json({ success: true, message: 'Payment verified' })
     } catch (error) {
