@@ -2,7 +2,9 @@ import User from "../models/User.models.js";
 import Booking from "../models/Booking.models.js";
 import Show from "../models/Show.models.js"
 import razorpayInstance from "../configs/razorpay.configs.js";
+import sendEmail from "../configs/nodemailer.configs.js";
 import crypto from 'crypto'
+import { inngest } from "../inngest/index.js";
 
 // check if theres any seat available or not
 export const checkSeatsAvailability = async (showId, selectedSeats) => {
@@ -138,8 +140,10 @@ export const createOrder = async (req,res) => {
 
 export const verifyPayment = async (req,res) => {
     try {
+        console.log('verifyPayment: handler entered')
         const {userId} = req.auth()
         const {bookingId, razorpay_order_id, razorpay_payment_id, razorpay_signature} = req.body
+        console.log('verifyPayment: received request', { userId, bookingId, razorpay_order_id, razorpay_payment_id })
 
         if(!userId){
             return res.json({success:false, message: "Login to proceed"})
@@ -155,7 +159,7 @@ export const verifyPayment = async (req,res) => {
             return res.json({ success: false, message: 'Invalid payment signature' })
         }
 
-        const booking = await Booking.findOne({ _id: bookingId, user: userId })
+        const booking = await Booking.findOne({ _id: bookingId, user: userId }).populate('user')
 
         if (!booking) {
             return res.json({ success: false, message: 'Booking not found' })
@@ -163,12 +167,34 @@ export const verifyPayment = async (req,res) => {
         if (booking.isPaid) {
             return res.json({ success: true, message: 'Already paid' })
         }
-        
+
+        console.log('verifyPayment: sending inngest event for booking', bookingId)
+        await inngest.send({
+            name: "app/show.booked",
+            data: { bookingId }
+        })
+        console.log('verifyPayment: inngest send completed for booking', bookingId)
+
         booking.isPaid = true
         booking.paymentLink = razorpay_payment_id
-        
+
         await booking.save()
-        
+
+        try {
+            const emailResp = await sendEmail({
+                to: booking.user.email,
+                subject: `Payment confirmation: booking ${bookingId}`,
+                body: `<p>Your payment was confirmed. Booking ID: ${bookingId}</p>`
+            })
+            console.log('verifyPayment: direct email sent for booking', bookingId, {
+                messageId: emailResp?.messageId,
+                accepted: emailResp?.accepted,
+                rejected: emailResp?.rejected
+            })
+        } catch (emailError) {
+            console.log('verifyPayment: direct email failed:', emailError && emailError.message)
+        }
+
         res.json({ success: true, message: 'Payment verified' })
     } catch (error) {
         console.log(error.message);
